@@ -11,18 +11,33 @@ import { NgForm } from '@angular/forms';
 export class HomeComponent {
   //languages : string[];
   
-  languages = ['English', 'Spanish', 'Other'];
+  //languages = ['English', 'Spanish', 'Other'];
+
+  languages = [];
   model = new Employee('', '', true, '', 'default');
   hasPrimaryLanguageError = false;
 
   constructor(private formPoster: FormPosterService){
-
+    this.formPoster.getLanguages()
+      .subscribe(
+        data => this.languages = data.languages,
+        err => console.log('get error: ', err)
+      );
   }
 
   submitForm(form: NgForm) {
-    console.log(this.model);                      // 1.
-    console.log(form.value);                      // 2.
-    this.formPoster.postEmployeeForm(this.model); // 3.
+    //console.log(this.model);                      // 1.
+    //console.log(form.value);                      // 2.
+    this.validatePrimaryLanguage(this.model.primaryLanguage);
+    if (this.hasPrimaryLanguageError)
+       return;
+    //this.formPoster.postEmployeeForm(this.model); // 3.
+    
+    this.formPoster.postEmployeeForm(this.model)
+      .subscribe(
+        data => console.log('success: ', data),
+        err => console.log('error: ', err)
+      )
   }
 
   firstNameToUpperCase(value: string){
@@ -32,5 +47,12 @@ export class HomeComponent {
     else{
       this.model.firstName = value;
     }
+  }
+
+  validatePrimaryLanguage(value) {
+    if (value == 'default')
+      this.hasPrimaryLanguageError = true;
+    else
+      this.hasPrimaryLanguageError = false;
   }
 }
